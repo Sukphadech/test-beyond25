@@ -428,7 +428,7 @@ btn_paid.addEventListener("click", async () => {
       slip: slipBase64
     };
 
-    const scriptUrl = "https://script.google.com/macros/s/AKfycbykUNP1tOJC4XqdRmZ2HedodFbhfLOEHdgt-3L4Vvoq1DD1f3RMx2msba13lkQzRPGPPw/exec";
+    const scriptUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbykUNP1tOJC4XqdRmZ2HedodFbhfLOEHdgt-3L4Vvoq1DD1f3RMx2msba13lkQzRPGPPw/exec");
 
     try {
       const response = await fetch(scriptUrl, {
