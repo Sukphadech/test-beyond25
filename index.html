@@ -34,9 +34,17 @@
                 <div class="card-body">
                     <h2 class="title">ลงทะเบียน</h2>
                     <form method="POST" id="registerForm">
+                        <div class="input-group">
+                        <div class="rs-select2 js-select-simple select--no-search">
+                            <select id="userList" name="userList">
+                            <option disabled selected>กำลังโหลดรายชื่อ....</option>'
+                            </select>
+                            <div class="select-dropdown"></div>
+                        </div>
+                        </div>
                         <div class="checkbox-group">
                             <label class="form-check-label me-4 d-flex align-items-center">
-                            <input class="form-check-input-square me-2" type="checkbox" id="alreadyRegistered"/>ลงทะเบียนแล้ว ต้องการชำระเงิน</label>
+                            <input class="form-check-input-square me-2" type="checkbox" id="NotRegister"/>ยังไม่เคยลงทะเบียนในฐานข้อมูล beyond24</label>
                         </div>
                         <br>
                         <div class="input-group">
@@ -55,9 +63,10 @@
                             <div class="rs-select2 js-select-simple select--no-search">
                                 <select id="ticketType" name="class">
                                     <option disabled="disabled" selected="selected">เลือกประเภทบัตร</option>
-                                    <option  value="Early Bird" id="ticket_earlybird">Early Bird</option>
-                                    <option value="บัตรวันเสาร์ 1 วัน" id="ticket_saturday">วันเสาร์ 1 วัน</option>
-                                    <option value="บัตรวันอาทิตย์ 1 วัน" id="ticket_sunday">วันอาทิตย์ 1 วัน</option>
+                                    <!-- <option  value="Early Bird" id="ticket_earlybird">Early Bird</option> -->
+                                    <option  value="ทั่วไป 2 วัน" id="ticket_earlybird">ทั่วไป 2 วัน</option>
+                                    <option value="วันเสาร์ 1 วัน" id="ticket_saturday">วันเสาร์ 1 วัน</option>
+                                    <option value="วันอาทิตย์ 1 วัน" id="ticket_sunday">วันอาทิตย์ 1 วัน</option>
                                 </select>
                                 <div class="select-dropdown"></div>
                             </div>
@@ -81,7 +90,7 @@
                         </div>
                         <div id="inf_error"></div>
                         <div class="p-t-20">
-                            <button id="btn_registerSubmit" class="btn btn--radius btn--green" type="submit">ลงทะเบียน</button>
+                            <button id="btn_registerSubmit" class="btn btn--radius btn--green" type="button">ลงทะเบียน</button>
                         </div>
                         
                     </form>
@@ -113,14 +122,7 @@
                             <button id="btn_edit" class="btn btn--radius btn--green"  type="button">แก้ไขข้อมูล</button>
                         </div>
                         <br>
-                        <div class="input-group">
-                        <div class="rs-select2 js-select-simple select--no-search">
-                            <select id="userList" name="userList">
-                            <option disabled selected>กำลังโหลดรายชื่อ....</option>'
-                            </select>
-                            <div class="select-dropdown"></div>
-                        </div>
-                        </div>
+                        
                                      
                         <!-- update -->
 

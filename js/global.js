@@ -64,19 +64,15 @@
 
 })(jQuery);
 
-window.onload = function() {
-    window.scrollTo({
-      top: 0,
-      left: 0,
-      behavior: "smooth" 
-    });
-  };
+
+
 
 
 const needPayment = document.getElementById('paid_now');
 const needPayLater= document.getElementById('paid_later');
 const registerForm = document.getElementById('registerForm');
 const registerSubmit = document.getElementById('registerSubmit');
+const NotRegister = document.getElementById("NotRegister")
 const alreadyRegistered = document.getElementById("alreadyRegistered");
 const btn_edit = document.getElementById("btn_edit");
 const userList = document.getElementById("userList");
@@ -92,14 +88,71 @@ const fileInput = document.getElementById("paymentSlip");
 let data = [];
 let selectedUser = null;
 
+
+
+
+window.onload = async function() {
+  window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "smooth" 
+  });
+    const userList = document.getElementById("userList");
+    const sheetUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxMtCV-emJUZTYJqdLy9za9xVpy4nmOzkb0zLRqvDdM7gxGKnS48f7caP7REMOp2w8U-g/exec");
+    try {
+    // ✅ ถ้ามีข้อมูลอยู่แล้ว ไม่ต้องโหลดใหม่
+    if (data && data.length > 0) {
+      console.log("📦 ข้ามการโหลด — ใช้ข้อมูลเดิมจาก cache:", data.length, "รายการ");
+    } else {
+      // โหลดครั้งแรกเท่านั้น
+      userList.innerHTML = '<option disabled selected>กำลังโหลดรายชื่อ....</option>';
+      const response = await fetch(sheetUrl);
+      data = await response.json();
+      console.log("✅ โหลดรายชื่อสำเร็จ:", data.length, "รายการ");
+    }
+
+    // ✅ ไม่ว่าจะโหลดใหม่หรือใช้ cache — ก็สร้าง dropdown ทุกครั้ง
+    userList.innerHTML = '<option disabled selected>เลือกรายชื่อ</option>';
+    data.forEach(user => {
+      const option = document.createElement("option");
+      option.value = `${user.nickname}-${user.line}`;
+      option.textContent = `${user.nickname}-${user.line}`;
+      option.id = `${user.nickname}-${user.line}`;
+      userList.appendChild(option);
+    });
+    // ➕ เพิ่มตัวเลือกพิเศษ
+    const notFoundOption = document.createElement("option");
+    notFoundOption.value = "NOT_FOUND";
+    notFoundOption.textContent = "❌ ไม่พบรายชื่อของฉัน";
+    userList.appendChild(notFoundOption);
+
+    // อัปเดต select2
+    $("#userList").trigger("change.select2");
+
+  } catch (error) {
+    console.error("❌ โหลดรายชื่อไม่สำเร็จ:", error);
+  }
+};
+
+//---------------------------
+//Function WhenStart Hidden 
+//---------------------------
 window.addEventListener("DOMContentLoaded", function () {
   const paymentForm = document.getElementById("paymentForm");
-  const allPayFields = paymentForm.querySelectorAll("input, select, textarea, button");
-  allPayFields.forEach(el => {
-      if (el.id !== "copyBtn") {
-        el.disabled = true;
-      }
-    });
+  const fullname = document.getElementById('fullname');
+  const nickname = document.getElementById('nickname');
+  const line = document.getElementById('line');
+  const ticketType = document.getElementById('ticketType');
+  
+  fullname.readOnly = true;
+  fullname.style.opacity = "0.4";
+  nickname.readOnly = true;
+  nickname.style.opacity = "0.4";
+  $("#line").next(".select2-container").css("pointer-events", "none");
+  $("#ticketType").next(".select2-container").css("pointer-events", "none");
+  $("#line").next(".select2-container").css("opacity", "0.4");
+  $("#ticketType").next(".select2-container").css("opacity", "0.4");
+  
   paymentForm.style.opacity = "0.6";
   paymentForm.style.pointerEvents = "none";
 
@@ -115,7 +168,15 @@ window.addEventListener("DOMContentLoaded", function () {
   needPayLater.disabled = true;
   needPayLater.style.opacity = "0.2";
 
-  function checkFormComplete() {
+  const allPayFields = paymentForm.querySelectorAll("input, select, textarea, button");
+  allPayFields.forEach(el => {
+      if (el.id !== "copyBtn") {
+        el.disabled = true;
+      }
+    });
+
+//Function WhenStart CheckFullInput
+function checkFormComplete() {
     const fullname = document.getElementById('fullname');
     const nickname = document.getElementById('nickname');
     const line = document.getElementById('line');
@@ -127,7 +188,7 @@ window.addEventListener("DOMContentLoaded", function () {
     const isLine = line.value.trim() !== "สายงาน";   
     const isTicket = ticketType.value.trim() !== "เลือกประเภทบัตร";
     
-
+    
     if (isFullname && isNickname && isLine && isTicket) {
       inf_error.textContent = "";
       needPayment.disabled = false;
@@ -141,16 +202,17 @@ window.addEventListener("DOMContentLoaded", function () {
       needPayment.disabled = true;
       needPayment.style.opacity = "0.2";
       needPayLater.disabled = true;
-      needPayLater.style.opacity = "0.2";
-
+      needPayLater.style.opacity = "0.2";}
     }
-  }
-
+  $('#line').on('change', checkLineAndTicket);
+  $('#ticketType').on('change', checkLineAndTicket);
   document.getElementById("fullname").addEventListener("input", checkFormComplete);
   document.getElementById("nickname").addEventListener("input", checkFormComplete);
   document.getElementById("line").addEventListener("change", () => setTimeout(checkFormComplete, 100));
   document.getElementById("ticketType").addEventListener("change", () => setTimeout(checkFormComplete, 100));
   checkFormComplete();
+  
+  
 });
 
 
@@ -170,8 +232,11 @@ btn_edit.addEventListener('click', function () {
     registerForm.style.opacity = "1";
     registerForm.style.pointerEvents = "auto";
     needPayment.checked = false;
-    alreadyRegistered.checked = false;
+    NotRegister.disabled = false;
+    NotRegister.checked = true;
+    NotRegister.style.opacity = "1"; 
     registerForm.scrollIntoView({ behavior: "smooth", block: "start" });
+
 
     const paymentForm = document.getElementById("paymentForm");
     const allPayFields = paymentForm.querySelectorAll("input, select, textarea, button");
@@ -203,51 +268,38 @@ copyBtn.addEventListener("click", () => {
 
 
 
-alreadyRegistered.addEventListener('change', async function () {
+NotRegister.addEventListener('change', function () {
+  const fullname = document.getElementById('fullname');
+  const nickname = document.getElementById('nickname');
+  const line = document.getElementById('line');
+  const ticketType = document.getElementById('ticketType');
+  
+
   if (this.checked) {
-        const allFields = registerForm.querySelectorAll("input, select, textarea, button");
-        allFields.forEach(el => {
-        if (el) { 
-          el.disabled = true;
-        }});
-        registerForm.style.opacity = "0.6"; 
-        registerForm.style.pointerEvents = "none"; 
-        registerForm.style.userSelect = "none";
-        paymentForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  btn_paid.disabled = true;
-  btn_paid.style.opacity = "0.2";
-  btn_paid.style.pointerEvents = "none";
-  enablePaymentForm();
-  const userList = document.getElementById("userList");
-  const sheetUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbz04POC0bDuB1OkCxT6rqJp1HVD6thvinQTwtCdlWJ-D4HCeKh_SmUy5CIO2jMtW146qA/exec");
-  try {
-  // ✅ ถ้ามีข้อมูลอยู่แล้ว ไม่ต้องโหลดใหม่
-  if (data && data.length > 0) {
-    console.log("📦 ข้ามการโหลด — ใช้ข้อมูลเดิมจาก cache:", data.length, "รายการ");
-  } else {
-    // โหลดครั้งแรกเท่านั้น
-    userList.innerHTML = '<option disabled selected>กำลังโหลดรายชื่อ....</option>';
-    const response = await fetch(sheetUrl);
-    data = await response.json();
-    console.log("✅ โหลดรายชื่อสำเร็จ:", data.length, "รายการ");
+    checkLineAndTicket();
+    $("#line").next(".select2-container").css("pointer-events", "auto");
+    $("#ticketType").next(".select2-container").css("pointer-events", "auto");
+    $("#line").next(".select2-container").css("opacity", "1");
+    $("#ticketType").next(".select2-container").css("opacity", "1");
+    $("#userList").next(".select2-container").css("pointer-events", "none");
+    $("#userList").next(".select2-container").css("opacity", "0.4");
+    
+}else{
+  fullname.readOnly = true;
+  fullname.style.opacity = "0.4"; 
+  nickname.readOnly = true;
+  nickname.style.opacity = "0.4"; 
+  $("#line").next(".select2-container").css("pointer-events", "none");
+  $("#ticketType").next(".select2-container").css("pointer-events", "none");
+  $("#line").next(".select2-container").css("opacity", "0.4");
+  $("#ticketType").next(".select2-container").css("opacity", "0.4");
+  $("#userList").next(".select2-container").css("pointer-events", "auto");
+  $("#userList").next(".select2-container").css("opacity", "1");
   }
 
-  // ✅ ไม่ว่าจะโหลดใหม่หรือใช้ cache — ก็สร้าง dropdown ทุกครั้ง
-  userList.innerHTML = '<option disabled selected>เลือกรายชื่อ</option>';
-  data.forEach(user => {
-    const option = document.createElement("option");
-    option.value = `${user.nickname}-${user.line}`;
-    option.textContent = `${user.nickname}-${user.line}`;
-    option.id = `${user.nickname}-${user.line}`;
-    userList.appendChild(option);
-  });
-
-} catch (error) {
-  console.error("❌ โหลดรายชื่อไม่สำเร็จ:", error);
-}
-  
 });
+
+
 
 
 $('#userList').on('select2:select', function (e) {
@@ -259,11 +311,49 @@ $('#userList').on('select2:select', function (e) {
   const user = data.find(u => u.nickname === nickname && u.line === line);
 
   console.log("🧩 user ที่พบ:", user);
-  if (user) {
+  
+  if (user && user !== "NOT_FOUND") {
+    NotRegister.disabled = true;
+    NotRegister.style.opacity = "0.4"; 
+    const fullname = document.getElementById('fullname');
+    const nickname = document.getElementById('nickname');
+    const line = document.getElementById('line');
+    const ticketType = document.getElementById('ticketType');
+    fullname.value = user.fullname;
+    nickname.value = user.nickname;
+    $('#line').val(user.line).trigger('change');
+    let ticketClean = user.ticket.trim();
+    const ticketMap = {
+         "ทั่วไป 2 วัน":"ทั่วไป 2 วัน",
+        "Early Bird": "Early Bird",
+        "early bird": "Early Bird",
+        "Early Bird ": "Early Bird",
+
+        "บัตรวันเสาร์ 1 วัน": "วันเสาร์ 1 วัน",
+        "วันเสาร์  1 วัน": "วันเสาร์ 1 วัน",
+
+        "บัตรวันอาทิตย์ 1 วัน": "วันอาทิตย์ 1 วัน",
+        "บัตรวันอาทิตย์  1 วัน": "วันอาทิตย์ 1 วัน",
+        
+    };
+    if (ticketMap[ticketClean]) {
+        ticketClean = ticketMap[ticketClean];
+    }
+    $('#ticketType').val(ticketClean).trigger('change');
+    fullname.readOnly = true;
+    fullname.style.opacity = "0.4"; 
+    nickname.readOnly = true;
+    nickname.style.opacity = "0.4"; 
+    inf_error.textContent = "";
+    needPayment.disabled = false;
+    needPayment.style.opacity = "1";
+   
+
     selectedUser = user;
     checkPaidButtonStatus();
     let price = 0;
     if (user.ticket.includes("Early Bird")) price = 1100;
+    else if (user.ticket.includes("ทั่วไป 2 วัน")) price = 1350;
     else if (user.ticket.includes("1 วัน")) price = 800;
     setTimeout(() => {
     if (concludeBox) {
@@ -279,6 +369,8 @@ $('#userList').on('select2:select', function (e) {
   }, 100);
   } else {
     console.warn("❌ ไม่พบผู้ใช้ใน data:", selectedValue);
+    NotRegister.disabled = false;
+    NotRegister.style.opacity = "1"; 
   }
 });
 
@@ -326,6 +418,8 @@ needPayment.addEventListener('change', function () {
       const fullname = document.getElementById("fullname").value.trim();
       const lineSelect = document.getElementById("line");
       const line = lineSelect.options[lineSelect.selectedIndex].text;
+
+      
       
       const newOption = document.createElement("option");
       newOption.textContent = `${nickname}-${line}`;
@@ -335,10 +429,21 @@ needPayment.addEventListener('change', function () {
 
 
     const ticketType = ticketSelect.value;  
+    selectedUser = {
+        fullname: fullname,
+        nickname: nickname,
+        line: line,
+        ticket: ticketType
+      };
+      console.log("✅ เก็บ selectedUser แล้ว:", selectedUser);
+
     let price = 0;
     switch (ticketType) {
     case "Early Bird":
         price = 1100;
+        break;
+    case "ทั่วไป 2 วัน":
+        price = 1350;
         break;
     case "บัตรวันเสาร์ 1 วัน":
         price = 800;
@@ -360,49 +465,85 @@ needPayment.addEventListener('change', function () {
     }
   });
 
+function checkLineAndTicket() {
+  const fullname = document.getElementById("fullname");
+  const nickname = document.getElementById("nickname");
+  const line = document.getElementById("line");
+  const ticketType = document.getElementById("ticketType");
+
+  const isLineSelected = line.value.trim() !== "" && line.value.trim() !== "สายงาน";
+  const isTicketSelected = ticketType.value.trim() !== "" && ticketType.value.trim() !== "เลือกประเภทบัตร";
+
+  if (isLineSelected && isTicketSelected) {
+    // 🔓 เปิดให้กรอกชื่อ
+    fullname.readOnly = false;
+    fullname.style.opacity = "1";
+    fullname.style.pointerEvents = "auto";
+
+    nickname.readOnly = false;
+    nickname.style.opacity = "1";
+    nickname.style.pointerEvents = "auto";
+  } else {
+    // 🔒 ปิดไว้ก่อน ผู้ใช้ยังเลือกไม่ครบ
+    fullname.readOnly = true;
+    fullname.style.opacity = "0.4";
+    fullname.style.pointerEvents = "none";
+
+    nickname.readOnly = true;
+    nickname.style.opacity = "0.4";
+    nickname.style.pointerEvents = "none";
+  }
+}
+
+
 
 // ===========บันทึกข้อมูล===============
-
-document.getElementById("btn_registerSubmit").addEventListener("click", async function (e) {
-  e.preventDefault();
-
+btn_registerSubmit.addEventListener("click", async () => {
   const fullname = document.getElementById("fullname").value.trim();
   const nickname = document.getElementById("nickname").value.trim();
   const line = document.getElementById("line").value.trim();
   const ticketType = document.getElementById("ticketType").value.trim();
+  const status = "ยังไม่จ่าย";
+  const slip = "NaN";
+  btn_registerSubmit.disabled = true;
+  btn_registerSubmit.style.opacity = "0.4";
 
   if (!fullname || !nickname || !line || !ticketType) {
     alert("กรุณากรอกข้อมูลให้ครบก่อนลงทะเบียนค่ะ");
     return;
   }
 
-  const payload = {
-    fullname: fullname,
-    nickname: nickname,
-    line: line,
-    ticket: ticketType,
-  };
-
+  const payload = { fullname, nickname, line, ticket: ticketType, status, slip };
   console.log("ส่งข้อมูล:", payload);
-
-  const sheetUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxZ1n3WuykE5CKr56T9nxKxD56vvWBNN7e6zSKKzFjOD18Z1kFB2tPwxZTEHig_yFQKfw/exec");
+  const sheetUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxUi5LgMzMFnqQjNernBJAMKGY8uWbetOrMciJ_IaUlkh7SDflwalkO6UFfXo85Qgua1g/exec");
 
   try {
-    
-    const response = await fetch(sheetUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
+  
+  const response = await fetch(sheetUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+  alert("บันทึกข้อมูลสำเร็จค่ะ! กำลังเปิดหน้าตรวจสอบข้อมูล...");
 
-    const result = await response.json();
-    console.log("ผลลัพธ์จาก Script:", result);
+  setTimeout(() => {
+    window.location.href = "https://docs.google.com/spreadsheets/d/1jG5HirEsrzNXbvNOMjTxRnmPXvgUySn0OnZk3otAUUI/edit?gid=0#gid=0";
+  }, 10);
+
+  const result = await response.json();
+  console.log("ผลลัพธ์จาก Script:", result);
+
+   
 
   } catch (error) {
     console.error("❌ เกิดข้อผิดพลาด:", error);
     alert("เกิดข้อผิดพลาดระหว่างส่งข้อมูล");
   }
 });
+  
+
 
 
 
@@ -429,6 +570,8 @@ function checkPaidButtonStatus() {
 
 
 btn_paid.addEventListener("click", async () => {
+  btn_paid.disabled = true;
+  btn_paid.style.opacity = "0.4";
   const fileInput = document.getElementById("paymentSlip");
   const file = fileInput.files[0];
 
@@ -465,13 +608,16 @@ btn_paid.addEventListener("click", async () => {
 
       // 📦 เตรียมข้อมูลส่ง
       const payload = {
+        fullname: selectedUser.fullname,
         nickname: selectedUser.nickname,
         line: selectedUser.line,
+        ticket: selectedUser.ticket,
+        status:"จ่ายแล้ว",
         slip: slipBase64
       };
 
       // 🌐 URL ของ Google Apps Script
-      const scriptUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbwtHkVSkFff1aYurso1-vULVl_zOiwlw1rjttppsv5pHEXzrlDR0qyRYWOGmprURMLOuQ/exec");
+      const scriptUrl = "https://corsproxy.io/?" + encodeURIComponent("https://script.google.com/macros/s/AKfycbxUi5LgMzMFnqQjNernBJAMKGY8uWbetOrMciJ_IaUlkh7SDflwalkO6UFfXo85Qgua1g/exec");
 
       try {
         console.log("📤 กำลังส่งข้อมูล:", payload);
@@ -480,6 +626,12 @@ btn_paid.addEventListener("click", async () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
+        alert("บันทึกข้อมูลสำเร็จค่ะ! กำลังเปิดหน้าตรวจสอบข้อมูล...");
+
+        setTimeout(() => {
+          window.location.href = "https://docs.google.com/spreadsheets/d/1jG5HirEsrzNXbvNOMjTxRnmPXvgUySn0OnZk3otAUUI/edit?gid=0#gid=0";
+        }, 10);
+
 
 
         
