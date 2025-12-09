@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Artistry Registration Table</title>
+    <link rel="stylesheet" href="./css/display.css">
+
+</head>
+<body>
+
+<h2>ตารางข้อมูลผู้ลงทะเบียน Artistry</h2>
+
+<button onclick="loadTable()">รีเฟรชตาราง</button>
+
+<table id="regTable">
+    <thead>
+        <tr>
+            <th>ชื่อ–นามสกุล</th>
+            <th>ชื่อเล่น</th>
+            <th>สายงาน</th>
+            <th>สถานะ</th>
+            <th>สลิป</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<!-- Modal -->
+<div id="slipModal" onclick="closeSlipModal()">
+    <img id="slipImage" src="">
+</div>
+<script src="js/display.js"></script>
+
+</body>
+</html>
