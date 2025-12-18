@@ -96,8 +96,8 @@ const SUPABASE_URL = "https://lrkaigodgewdhncqdzpz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_sKcAGI3Y4nuRRoazBdGQcw_lJZILGpg";
 
 // ชื่อตารางจริงใน Supabase (เป็นตัวพิมพ์เล็กทั้งหมด)
-const TABLE_MEMBERS  = "memberdb";
-const TABLE_REGISTER = "beyond25";
+const TABLE_MEMBERS  = "test_memberdb2";
+const TABLE_REGISTER = "test_beyond25";
 
 const SUPABASE_HEADERS = {
     "Content-Type": "application/json",

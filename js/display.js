@@ -11,7 +11,7 @@ async function loadTable() {
 
     try {
         res = await fetch(
-            `${SUPABASE_URL}/rest/v1/beyond25?select=*`,
+            `${SUPABASE_URL}/rest/v1/test_beyond25?select=*`,
             {
                 headers: {
                     apikey: SUPABASE_KEY,
